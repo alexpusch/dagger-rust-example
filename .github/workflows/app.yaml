@@ -14,9 +14,9 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      # DAGGER_CACHE_FROM: type=gha,scope=dagger-cache-example-${{github.event.number}}
-      # DAGGER_CACHE_TO: type=gha,mode=max,scope=dagger-cache-example-${{github.event.number}}
-      DAGGER_CACHE_TO: type=local,mode=max,dest=/tmp/storage
+      DAGGER_CACHE_FROM: type=gha,scope=dagger-cache-example-${{github.event.number}}
+      DAGGER_CACHE_TO: type=gha,mode=max,scope=dagger-cache-example-${{github.event.number}}
+      # DAGGER_CACHE_TO: type=local,mode=max,dest=/tmp/storage
       # DAGGER_CACHE_FROM: type=local,src=/tmp/storage
     steps:
       - name: Clone repository

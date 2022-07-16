@@ -51,7 +51,7 @@ import (
                 }
             },
             docker.#Set & {
-              config: cmd: ["/app/dagger-rust"]
+              config: cmd: ["/app/target/debug/dagger-rust"]
             },
         ]
     }
