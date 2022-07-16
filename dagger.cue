@@ -30,6 +30,12 @@ import (
               config: workdir: "/app"
             },
             docker.#Run & {
+              command: {
+                name: "mkdir",
+                args: "/app/target"
+              }
+            },
+            docker.#Run & {
                 command: {
                     name: "cargo"
                     args: ["build"]
