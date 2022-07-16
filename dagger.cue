@@ -32,7 +32,7 @@ import (
             docker.#Run & {
               command: {
                 name: "mkdir",
-                args: "/app/target"
+                args: ["/app/target"]
               }
             },
             docker.#Run & {
