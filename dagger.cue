@@ -34,21 +34,21 @@ import (
                     name: "cargo"
                     args: ["build"]
                 },
-                mounts: {
-                  buildCache: {
-                    dest: "target"
-                    contents: core.#CacheDir & {
-                       id: "cargo-cache"
-                    }
-                  }
+                // mounts: {
+                //   buildCache: {
+                //     dest: "target"
+                //     contents: core.#CacheDir & {
+                //        id: "cargo-cache"
+                //     }
+                //   }
 
-                  regCache: {
-                    dest: "/usr/local/cargo/registry"
-                    contents: core.#CacheDir & {
-                       id: "cargo-reg-cache"
-                    }
-                  }
-                }
+                //   regCache: {
+                //     dest: "/usr/local/cargo/registry"
+                //     contents: core.#CacheDir & {
+                //        id: "cargo-reg-cache"
+                //     }
+                //   }
+                // }
             },
         ]
     }
