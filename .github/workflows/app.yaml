@@ -14,12 +14,21 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      DAGGER_CACHE_FROM: type=gha,scope=dagger-cache-example-${{github.event.number}}
-      DAGGER_CACHE_TO: type=gha,mode=max,scope=dagger-cache-example-${{github.event.number}}
-
+      # DAGGER_CACHE_FROM: type=gha,scope=dagger-cache-example-${{github.event.number}}
+      # DAGGER_CACHE_TO: type=gha,mode=max,scope=dagger-cache-example-${{github.event.number}}
+      DAGGER_CACHE_TO: type=local,mode=max,dest=/tmp/storage
+      DAGGER_CACHE_FROM: --cache-from type=local,src=/tmp/storage
     steps:
       - name: Clone repository
         uses: actions/checkout@v2
+
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/storage
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
 
       # You need to run `dagger project init` locally before and commit the cue.mod directory to the repository with its contents
       - name: Deploy
