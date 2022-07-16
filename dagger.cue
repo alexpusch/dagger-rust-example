@@ -33,6 +33,14 @@ import (
               command: {
                 name: "mkdir",
                 args: ["-p", "/app/target/debug"]
+              },
+              mounts: {
+                buildCache: {
+                  dest: "/app/target"
+                  contents: core.#CacheDir & {
+                      id: "app-cargo-cache"
+                  }
+                }
               }
             },
             docker.#Run & {
