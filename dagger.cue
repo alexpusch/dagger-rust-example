@@ -35,12 +35,12 @@ import (
                     args: ["build"]
                 },
                 mounts: {
-                  buildCache: {
-                    dest: "/app/target"
-                    contents: core.#CacheDir & {
-                       id: "cargo-cache"
-                    }
-                  }
+                  // buildCache: {
+                  //   dest: "/app/target"
+                  //   contents: core.#CacheDir & {
+                  //      id: "cargo-cache"
+                  //   }
+                  // }
 
                   regCache: {
                     dest: "/usr/local/cargo/registry"
