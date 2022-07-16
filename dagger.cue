@@ -40,21 +40,21 @@ import (
                     contents: core.#CacheDir & {
                        id: "app-cargo-cache2"
                     }
-                  }
+                  },
 
                   buildDepsCache: {
                     dest: "/app/target/debug/deps"
                     contents: core.#CacheDir & {
                        id: "app-cargo-cache-deps"
                     }
-                  }
+                  },
 
                   buildIncCache: {
                     dest: "/app/target/debug/incremental"
                     contents: core.#CacheDir & {
                        id: "app-cargo-cache-incremental"
                     }
-                  }
+                  },
 
                   regCache: {
                     dest: "/usr/local/cargo/registry"
