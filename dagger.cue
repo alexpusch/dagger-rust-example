@@ -34,21 +34,21 @@ import (
                     name: "cargo"
                     args: ["build"]
                 },
-                // mounts: {
-                //   buildCache: {
-                //     dest: "target"
-                //     contents: core.#CacheDir & {
-                //        id: "cargo-cache"
-                //     }
-                //   }
+                mounts: {
+                  buildCache: {
+                    dest: "/app/target"
+                    contents: core.#CacheDir & {
+                       id: "cargo-cache"
+                    }
+                  }
 
-                //   regCache: {
-                //     dest: "/usr/local/cargo/registry"
-                //     contents: core.#CacheDir & {
-                //        id: "cargo-reg-cache"
-                //     }
-                //   }
-                // }
+                  regCache: {
+                    dest: "/usr/local/cargo/registry"
+                    contents: core.#CacheDir & {
+                       id: "cargo-reg-cache"
+                    }
+                  }
+                }
             },
         ]
     }
@@ -62,10 +62,10 @@ import (
         docker.#Copy & {
             contents: _s1.output.rootfs,
             source: "/app/target/debug/dagger-rust"
-            dest:     "/app"
+            dest:     "/app/dagger-rust"
         },
         docker.#Set & {
-            config: cmd: ["cargo", "run"]
+            config: cmd: ["/app/dagger-rust"]
         },
       ]
     }
