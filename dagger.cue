@@ -38,14 +38,14 @@ import (
                   buildCache: {
                     dest: "/app/target"
                     contents: core.#CacheDir & {
-                       id: "app-cargo-cache"
+                       id: "app-cargo-cache2"
                     }
                   }
 
                   regCache: {
                     dest: "/usr/local/cargo/registry"
                     contents: core.#CacheDir & {
-                       id: "cargo-reg-cache"
+                       id: "cargo-reg-cache2"
                     }
                   }
                 }
@@ -75,6 +75,8 @@ import (
 dagger.#Plan & {
     client: filesystem: ".": read: contents: dagger.#FS,
     client: network: "unix:///var/run/docker.sock": connect: dagger.#Socket,
+
+    client: filesystem: "./output": write: contents: actions.build.output
 
     actions: {
       build: #CargoBuild & {
