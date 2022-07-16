@@ -5,7 +5,9 @@ on:
     # Trigger this workflow only on commits pushed to the main branch
     branches:
       - master
-
+  pull_request:
+    branches: [ master ]
+    
 env:
   APP_NAME: todoapp-dagger-europa
 
@@ -13,14 +15,21 @@ jobs:
   dagger:
     runs-on: ubuntu-latest
 
-    env:
-      DAGGER_CACHE_FROM: type=gha,scope=dagger-cache-example
-      DAGGER_CACHE_TO: type=gha,mode=max,scope=dagger-cache-example
-      # DAGGER_CACHE_TO: type=local,mode=max,dest=/tmp/storage
-      # DAGGER_CACHE_FROM: type=local,src=/tmp/storage
     steps:
       - name: Clone repository
         uses: actions/checkout@v2
+
+      - name: Sets env vars on push to main
+        run: |
+          echo "DAGGER_CACHE_TO=type=gha,mode=max,scope=dagger-rust-master" >> $GITHUB_ENV
+          echo "DAGGER_CACHE_FROM=type=gha,scope=dagger-rust-master" >> $GITHUB_ENV
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+
+      - name: Sets env vars on pull request
+        run: |
+          echo "DAGGER_CACHE_TO=type=gha,mode=max,scope=dagger-rust-${{github.event.number}}" >> $GITHUB_ENV
+          echo "DAGGER_CACHE_FROM=type=gha,scope=dagger-rust-master type=gha,scope=dagger-rust-${{github.event.number}}" >> $GITHUB_ENV
+        if: ${{ github.event_name == 'pull_request' }}
 
       # - name: Cache Docker layers
       #   uses: actions/cache@v3
