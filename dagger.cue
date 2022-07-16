@@ -17,7 +17,7 @@ import (
     image: _build.output
 
     // Build steps
-    _build: docker.#Build & {
+    _s1: docker.#Build & {
         steps: [
             docker.#Pull & {
                 source: "rust:1.62-slim-bullseye"
@@ -36,9 +36,23 @@ import (
                 },
                 mounts: {
                   buildCache: {
-                    dest: "/app/target"
+                    dest: "/app/target/debug/build"
                     contents: core.#CacheDir & {
                        id: "app-cargo-cache2"
+                    }
+                  }
+
+                  buildDepsCache: {
+                    dest: "/app/target/debug/deps"
+                    contents: core.#CacheDir & {
+                       id: "app-cargo-cache-deps"
+                    }
+                  }
+
+                  buildIncCache: {
+                    dest: "/app/target/debug/incremental"
+                    contents: core.#CacheDir & {
+                       id: "app-cargo-cache-incremental"
                     }
                   }
 
@@ -56,21 +70,21 @@ import (
         ]
     }
 
-    // _build: docker.#Build & {
-    //   steps: [
-    //     docker.#Pull & {
-    //       source: "rust:1.62-slim-bullseye"
-    //     },
-    //     docker.#Copy & {
-    //         contents: _s1.output.rootfs,
-    //         source: "/app/target/debug/dagger-rust"
-    //         dest:     "/app/dagger-rust"
-    //     },
-    //     docker.#Set & {
-    //         config: cmd: ["/app/dagger-rust"]
-    //     },
-    //   ]
-    // }
+    _build: docker.#Build & {
+      steps: [
+        docker.#Pull & {
+          source: "rust:1.62-slim-bullseye"
+        },
+        docker.#Copy & {
+            contents: _s1.output.rootfs,
+            source: "/app/target/debug/dagger-rust"
+            dest:     "/app/dagger-rust"
+        },
+        docker.#Set & {
+            config: cmd: ["/app/dagger-rust"]
+        },
+      ]
+    }
 }
 
 // Example usage in a plan
