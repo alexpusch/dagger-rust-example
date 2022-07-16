@@ -76,8 +76,6 @@ dagger.#Plan & {
     client: filesystem: ".": read: contents: dagger.#FS,
     client: network: "unix:///var/run/docker.sock": connect: dagger.#Socket,
 
-    client: filesystem: "./output": write: contents: actions.build.output
-
     actions: {
       build: #CargoBuild & {
         app: client.filesystem.".".read.contents
