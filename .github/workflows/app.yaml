@@ -14,8 +14,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      DAGGER_CACHE_FROM: type=gha,scope=dagger-cache-example
-      DAGGER_CACHE_TO: type=gha,mode=max,scope=dagger-cache-example
+      DAGGER_CACHE_FROM: type=gha,scope=dagger-cache-example-${{github.event.number}}
+      DAGGER_CACHE_TO: type=gha,mode=max,scope=dagger-cache-example-${{github.event.number}}
 
     steps:
       - name: Clone repository
@@ -33,7 +33,7 @@ jobs:
           cmds: |
             project update
             do load
-            
+
       - name: Print Buildkitd Logs
         if: ${{ failure() }}
         run: |
