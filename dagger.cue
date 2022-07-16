@@ -17,7 +17,7 @@ import (
     image: _build.output
 
     // Build steps
-    _s1: docker.#Build & {
+    _build: docker.#Build & {
         steps: [
             docker.#Pull & {
                 source: "rust:1.62-slim-bullseye"
@@ -50,25 +50,27 @@ import (
                   }
                 }
             },
+            docker.#Set & {
+              config: cmd: ["/app/dagger-rust"]
+            },
         ]
     }
 
-
-    _build: docker.#Build & {
-      steps: [
-        docker.#Pull & {
-          source: "rust:1.62-slim-bullseye"
-        },
-        docker.#Copy & {
-            contents: _s1.output.rootfs,
-            source: "/app/target/debug/dagger-rust"
-            dest:     "/app/dagger-rust"
-        },
-        docker.#Set & {
-            config: cmd: ["/app/dagger-rust"]
-        },
-      ]
-    }
+    // _build: docker.#Build & {
+    //   steps: [
+    //     docker.#Pull & {
+    //       source: "rust:1.62-slim-bullseye"
+    //     },
+    //     docker.#Copy & {
+    //         contents: _s1.output.rootfs,
+    //         source: "/app/target/debug/dagger-rust"
+    //         dest:     "/app/dagger-rust"
+    //     },
+    //     docker.#Set & {
+    //         config: cmd: ["/app/dagger-rust"]
+    //     },
+    //   ]
+    // }
 }
 
 // Example usage in a plan
