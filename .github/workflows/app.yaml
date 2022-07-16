@@ -1,36 +1,49 @@
-name: todoapp
+name: build dagger-rust
 
 on:
   push:
     # Trigger this workflow only on commits pushed to the main branch
     branches:
       - master
-
-env:
-  APP_NAME: todoapp-dagger-europa
-
+  pull_request:
+    branches: [ master ]
+    
 jobs:
-  dagger:
+  build:
     runs-on: ubuntu-latest
 
-    env:
-      DAGGER_CACHE_FROM: type=gha,scope=dagger-cache-example
-      DAGGER_CACHE_TO: type=gha,mode=max,scope=dagger-cache-example
+    env: 
+      DAGGER_LOG_LEVEL: "debug"
 
     steps:
       - name: Clone repository
         uses: actions/checkout@v2
 
-      # You need to run `dagger project init` locally before and commit the cue.mod directory to the repository with its contents
-      - name: Deploy
+      - name: Sets env vars on push to main
+        run: |
+          echo "DAGGER_CACHE_TO=type=gha,mode=max,scope=dagger-rust-master" >> $GITHUB_ENV
+          echo "DAGGER_CACHE_FROM=type=gha,scope=dagger-rust-master" >> $GITHUB_ENV
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+
+      - name: Sets env vars on pull request
+        run: |
+          echo "DAGGER_CACHE_TO=type=gha,mode=max,scope=dagger-rust-${{github.event.number}}" >> $GITHUB_ENV
+          echo "DAGGER_CACHE_FROM=type=gha,scope=dagger-rust-master type=gha,scope=dagger-rust-${{github.event.number}}" >> $GITHUB_ENV
+        if: ${{ github.event_name == 'pull_request' }}
+
+      - name: Test
         uses: dagger/dagger-for-github@v3
-        # See all options at https://github.com/dagger/dagger-for-github
         with:
           version: 0.2
-          # To pin external dependencies, you can use `project update github.com/[package-source]@v[n]`
           cmds: |
-            project update
+            do test
+
+      - name: Build production image
+        uses: dagger/dagger-for-github@v3
+        with:
+          version: 0.2
+          cmds: |
             do load
 
-      - name: run
-        run: docker run app-image
+      - name: Run image
+        run: docker run dagger-rust

@@ -1,1 +1,1 @@
-module: ""
+module: "info@example.com"
