@@ -41,21 +41,21 @@ import (
                   name: "cargo"
                   args: ["build"]
               },
-              mounts: {
-                buildCache: {
-                  dest: "/app/target"
-                  contents: core.#CacheDir & {
-                      id: "app-cargo-cache-build"
-                  }
-                },
+              // mounts: {
+              //   buildCache: {
+              //     dest: "/app/target"
+              //     contents: core.#CacheDir & {
+              //         id: "app-cargo-cache-build"
+              //     }
+              //   },
 
-                regCache: {
-                  dest: "/usr/local/cargo/registry"
-                  contents: core.#CacheDir & {
-                      id: "cargo-reg-cache"
-                  }
-                }
-              }
+              //   regCache: {
+              //     dest: "/usr/local/cargo/registry"
+              //     contents: core.#CacheDir & {
+              //         id: "cargo-reg-cache"
+              //     }
+              //   }
+              // }
             },
             docker.#Copy & {
               contents: app
@@ -66,21 +66,21 @@ import (
                   name: "cargo"
                   args: ["build"]
               },
-              mounts: {
-                buildCache: {
-                  dest: "/app/target"
-                  contents: core.#CacheDir & {
-                      id: "app-cargo-cache-build"
-                  }
-                },
+              // mounts: {
+              //   buildCache: {
+              //     dest: "/app/target"
+              //     contents: core.#CacheDir & {
+              //         id: "app-cargo-cache-build"
+              //     }
+              //   },
 
-                regCache: {
-                  dest: "/usr/local/cargo/registry"
-                  contents: core.#CacheDir & {
-                      id: "cargo-reg-cache"
-                  }
-                }
-              }
+              //   regCache: {
+              //     dest: "/usr/local/cargo/registry"
+              //     contents: core.#CacheDir & {
+              //         id: "cargo-reg-cache"
+              //     }
+              //   }
+              // }
             },
             docker.#Run & {
                 command: {
