@@ -2,7 +2,7 @@ package main
 
 import (
     "dagger.io/dagger"
-    "dagger.io/dagger/core"
+    // "dagger.io/dagger/core"
     "universe.dagger.io/docker"
     "universe.dagger.io/docker/cli"
 )
