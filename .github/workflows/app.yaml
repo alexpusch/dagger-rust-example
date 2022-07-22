@@ -19,6 +19,9 @@ jobs:
       - name: Clone repository
         uses: actions/checkout@v2
 
+      - name: Expose GitHub Runtime
+        uses: crazy-max/ghaction-github-runtime@v2
+
       - name: Sets env vars on push to main
         run: |
           echo "DAGGER_CACHE_TO=type=gha,mode=max,scope=dagger-rust-master" >> $GITHUB_ENV
