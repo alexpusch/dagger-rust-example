@@ -19,8 +19,8 @@ jobs:
       - name: Clone repository
         uses: actions/checkout@v2
 
-      - name: Expose GitHub Runtime
-        uses: crazy-max/ghaction-github-runtime@v2
+      # - name: Expose GitHub Runtime
+      #   uses: crazy-max/ghaction-github-runtime@v2
 
       - name: Sets env vars on push to main
         run: |
@@ -31,8 +31,14 @@ jobs:
       - name: Sets env vars on pull request
         run: |
           echo "DAGGER_CACHE_TO=type=gha,mode=max,scope=dagger-rust-${{github.event.number}}" >> $GITHUB_ENV
-          echo "DAGGER_CACHE_FROM=type=gha,scope=dagger-rust-master type=gha,scope=dagger-rust-${{github.event.number}}" >> $GITHUB_ENV
+          # echo "DAGGER_CACHE_FROM=type=gha,scope=dagger-rust-master type=gha,scope=dagger-rust-${{github.event.number}}" >> $GITHUB_ENV
+          echo "DAGGER_CACHE_FROM=type=gha,scope=dagger-rust-${{github.event.number}}" >> $GITHUB_ENV
         if: ${{ github.event_name == 'pull_request' }}
+
+      # - name: Sets env vars on pull request
+      #   run: |
+      #     echo "DAGGER_CACHE_TO=type=local,mode=max,dest=/tmp/storage" >> $GITHUB_ENV
+      #     echo "DAGGER_CACHE_FROM=type=local,src=/tmp/storage" >> $GITHUB_ENV
 
       # - name: Cache Docker layers
       #   uses: actions/cache@v3
