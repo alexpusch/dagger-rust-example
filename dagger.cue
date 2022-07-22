@@ -87,14 +87,14 @@ import (
                     name: "cp"
                     args: ["/app/target/debug/dagger-rust", "/app/dagger-rust"]
                 },
-                mounts: {
-                  buildCache: {
-                    dest: "/app/target"
-                    contents: core.#CacheDir & {
-                       id: "app-cargo-cache-build"
-                    }
-                  },
-                }
+                // mounts: {
+                //   buildCache: {
+                //     dest: "/app/target"
+                //     contents: core.#CacheDir & {
+                //        id: "app-cargo-cache-build"
+                //     }
+                //   },
+                // }
             },
             docker.#Set & {
               config: cmd: ["/app/dagger-rust"]
