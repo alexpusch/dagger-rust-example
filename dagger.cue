@@ -17,64 +17,71 @@ import (
     image: _build.output
 
     // Build steps
-    _build: docker.#Build & {
+    _s1: docker.#Build & {
         steps: [
             docker.#Pull & {
                 source: "rust:1.62-slim-bullseye"
             },
-            docker.#Copy & {
-                contents: app
-                dest:     "/app"
+            docker.#Run & {
+              command: {
+                name: "cargo",
+                args: ["new", "/app"]
+              }
             },
             docker.#Set & {
               config: workdir: "/app"
             },
+            docker.#Copy & {
+              contents: app
+              include: ["Cargo.toml", "Cargo.lock"]
+              dest:     "/app"
+            },
             docker.#Run & {
-                command: {
-                    // name: "sh"
-                    // args: ["ls -R /app/target/debug > /app/ls"]
-                    // flags: "-c": true
-                    name: "cargo"
-                    args: ["build"]
+              command: {
+                  name: "cargo"
+                  args: ["build"]
+              },
+              mounts: {
+                buildCache: {
+                  dest: "/app/target"
+                  contents: core.#CacheDir & {
+                      id: "app-cargo-cache-build"
+                  }
                 },
-                mounts: {
-                  buildCache: {
-                    dest: "/app/target"
-                    contents: core.#CacheDir & {
-                       id: "app-cargo-cache-build"
-                    }
-                  },
 
-                  // buildCache: {
-                  //   dest: "/app/target/.rustc_info.json"
-                  //   contents: core.#CacheDir & {
-                  //      id: "app-cargo-cache-build"
-                  //   }
-                  // },
-
-                  // buildDepsCache: {
-                  //   dest: "/app/target/debug/deps"
-                  //   contents: core.#CacheDir & {
-                  //      id: "app-cargo-cache-deps"
-                  //   }
-                  // },
-
-                  // buildIncCache: {
-                  //   dest: "/app/target/debug/incremental"
-                  //   contents: core.#CacheDir & {
-                  //      id: "app-cargo-cache-incremental"
-                  //   }
-                  // },
-
-                  regCache: {
-                    dest: "/usr/local/cargo/registry"
-                    contents: core.#CacheDir & {
-                       id: "cargo-reg-cache"
-                    }
+                regCache: {
+                  dest: "/usr/local/cargo/registry"
+                  contents: core.#CacheDir & {
+                      id: "cargo-reg-cache"
                   }
                 }
+              }
             },
+            docker.#Copy & {
+              contents: app
+              dest:     "/app"
+            },
+            docker.#Run & {
+              command: {
+                  name: "cargo"
+                  args: ["build"]
+              },
+              mounts: {
+                buildCache: {
+                  dest: "/app/target"
+                  contents: core.#CacheDir & {
+                      id: "app-cargo-cache-build"
+                  }
+                },
 
+                regCache: {
+                  dest: "/usr/local/cargo/registry"
+                  contents: core.#CacheDir & {
+                      id: "cargo-reg-cache"
+                  }
+                }
+              }
+            },
             docker.#Run & {
                 command: {
                     name: "cp"
@@ -89,28 +96,27 @@ import (
                   },
                 }
             },
-
             docker.#Set & {
               config: cmd: ["/app/dagger-rust"]
             },
         ]
     }
 
-    // _build: docker.#Build & {
-    //   steps: [
-    //     docker.#Pull & {
-    //       source: "rust:1.62-slim-bullseye"
-    //     },
-    //     docker.#Copy & {
-    //         contents: _s1.output.rootfs,
-    //         source: "/app/target/debug/dagger-rust"
-    //         dest:     "/app/dagger-rust"
-    //     },
-    //     docker.#Set & {
-    //         config: cmd: ["/app/dagger-rust"]
-    //     },
-    //   ]
-    // }
+    _build: docker.#Build & {
+      steps: [
+        docker.#Pull & {
+          source: "debian:buster-slim"
+        },
+        docker.#Copy & {
+            contents: _s1.output.rootfs,
+            source: "/app/dagger-rust"
+            dest:     "/app/dagger-rust"
+        },
+        docker.#Set & {
+            config: cmd: ["/app/dagger-rust"]
+        },
+      ]
+    }
 }
 
 // Example usage in a plan
