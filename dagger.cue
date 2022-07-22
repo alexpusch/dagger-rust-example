@@ -17,7 +17,7 @@ import (
     image: _build.output
 
     // Build steps
-    _s1: docker.#Build & {
+    _build: docker.#Build & {
         steps: [
             docker.#Pull & {
                 source: "rust:1.62-slim-bullseye"
@@ -31,65 +31,95 @@ import (
             },
             docker.#Run & {
                 command: {
+                    // name: "sh"
+                    // args: ["ls -R /app/target/debug > /app/ls"]
+                    // flags: "-c": true
                     name: "cargo"
                     args: ["build"]
                 },
                 mounts: {
                   buildCache: {
-                    dest: "/app/target/debug/build"
+                    dest: "/app/target"
                     contents: core.#CacheDir & {
-                       id: "app-cargo-cache2"
+                       id: "app-cargo-cache-build"
                     }
                   },
 
-                  buildDepsCache: {
-                    dest: "/app/target/debug/deps"
-                    contents: core.#CacheDir & {
-                       id: "app-cargo-cache-deps"
-                    }
-                  },
+                  // buildCache: {
+                  //   dest: "/app/target/.rustc_info.json"
+                  //   contents: core.#CacheDir & {
+                  //      id: "app-cargo-cache-build"
+                  //   }
+                  // },
 
-                  buildIncCache: {
-                    dest: "/app/target/debug/incremental"
-                    contents: core.#CacheDir & {
-                       id: "app-cargo-cache-incremental"
-                    }
-                  },
+                  // buildDepsCache: {
+                  //   dest: "/app/target/debug/deps"
+                  //   contents: core.#CacheDir & {
+                  //      id: "app-cargo-cache-deps"
+                  //   }
+                  // },
+
+                  // buildIncCache: {
+                  //   dest: "/app/target/debug/incremental"
+                  //   contents: core.#CacheDir & {
+                  //      id: "app-cargo-cache-incremental"
+                  //   }
+                  // },
 
                   regCache: {
                     dest: "/usr/local/cargo/registry"
                     contents: core.#CacheDir & {
-                       id: "cargo-reg-cache2"
+                       id: "cargo-reg-cache"
                     }
                   }
                 }
             },
+
+            docker.#Run & {
+                command: {
+                    name: "cp"
+                    args: ["/app/target/debug/dagger-rust", "/app/dagger-rust"]
+                },
+                mounts: {
+                  buildCache: {
+                    dest: "/app/target"
+                    contents: core.#CacheDir & {
+                       id: "app-cargo-cache-build"
+                    }
+                  },
+                }
+            },
+
             docker.#Set & {
               config: cmd: ["/app/target/debug/dagger-rust"]
             },
         ]
     }
 
-    _build: docker.#Build & {
-      steps: [
-        docker.#Pull & {
-          source: "rust:1.62-slim-bullseye"
-        },
-        docker.#Copy & {
-            contents: _s1.output.rootfs,
-            source: "/app/target/debug/dagger-rust"
-            dest:     "/app/dagger-rust"
-        },
-        docker.#Set & {
-            config: cmd: ["/app/dagger-rust"]
-        },
-      ]
-    }
+    // _build: docker.#Build & {
+    //   steps: [
+    //     docker.#Pull & {
+    //       source: "rust:1.62-slim-bullseye"
+    //     },
+    //     docker.#Copy & {
+    //         contents: _s1.output.rootfs,
+    //         source: "/app/target/debug/dagger-rust"
+    //         dest:     "/app/dagger-rust"
+    //     },
+    //     docker.#Set & {
+    //         config: cmd: ["/app/dagger-rust"]
+    //     },
+    //   ]
+    // }
 }
 
 // Example usage in a plan
 dagger.#Plan & {
-    client: filesystem: ".": read: contents: dagger.#FS,
+    client: filesystem: ".": read: {
+      contents: dagger.#FS
+      exclude: ["target", ".git"]
+
+    },
     client: network: "unix:///var/run/docker.sock": connect: dagger.#Socket,
 
     actions: {
