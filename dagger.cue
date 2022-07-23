@@ -2,22 +2,20 @@ package main
 
 import (
     "dagger.io/dagger"
-    // "dagger.io/dagger/core"
     "universe.dagger.io/docker"
     "universe.dagger.io/docker/cli"
 )
 
-// This action builds a docker image from a python app.
-// Build steps are defined in native CUE.
 #CargoBuild: {
-    // Source code of the Python application
     app: dagger.#FS
 
-    // Resulting container image
-    image: _build.output
+    release: bool | *false
 
-    // Build steps
-    _s1: docker.#Build & {
+    // Resulting container image
+    image: _prodStage.output
+
+    // Build app using rust image and cargo build
+    _buildStage: docker.#Build & {
         steps: [
             docker.#Pull & {
                 source: "rust:1.62-slim-bullseye"
@@ -38,8 +36,9 @@ import (
             },
             docker.#Run & {
               command: {
-                  name: "cargo"
-                  args: ["build"]
+                  name: "cargo",
+                  args: ["build", if release {"--release"}]
+                  
               },
               // mounts: {
               //   buildCache: {
@@ -64,7 +63,7 @@ import (
             docker.#Run & {
               command: {
                   name: "cargo"
-                  args: ["build"]
+                  args: ["build", if release {"--release"}]
               },
               // mounts: {
               //   buildCache: {
@@ -82,34 +81,20 @@ import (
               //   }
               // }
             },
-            docker.#Run & {
-                command: {
-                    name: "cp"
-                    args: ["/app/target/debug/dagger-rust", "/app/dagger-rust"]
-                },
-                // mounts: {
-                //   buildCache: {
-                //     dest: "/app/target"
-                //     contents: core.#CacheDir & {
-                //        id: "app-cargo-cache-build"
-                //     }
-                //   },
-                // }
-            },
             docker.#Set & {
               config: cmd: ["/app/dagger-rust"]
             },
         ]
     }
 
-    _build: docker.#Build & {
+    _prodStage: docker.#Build & {
       steps: [
         docker.#Pull & {
           source: "debian:buster-slim"
         },
         docker.#Copy & {
-            contents: _s1.output.rootfs,
-            source: "/app/dagger-rust"
+            contents: _buildStage.output.rootfs,
+            source: "/app/target/debug/dagger-rust"
             dest:     "/app/dagger-rust"
         },
         docker.#Set & {
@@ -119,7 +104,6 @@ import (
     }
 }
 
-// Example usage in a plan
 dagger.#Plan & {
     client: filesystem: ".": read: {
       contents: dagger.#FS
@@ -133,10 +117,23 @@ dagger.#Plan & {
         app: client.filesystem.".".read.contents
       },
 
+      buildProd: #CargoBuild & {
+        app: client.filesystem.".".read.contents
+        release: true
+      },
+
       load: cli.#Load & {
-          image: build._build.output
+          image: build.image
           host:  client.network."unix:///var/run/docker.sock".connect
-          tag:   "app-image"
+          tag:   "dagger-rust"
+      },
+
+      test: docker.#Run & {
+        input: build._buildStage.output,
+        command: {
+          name: "cargo",
+          args: ["test"]
+        }
       }
     }
 }
