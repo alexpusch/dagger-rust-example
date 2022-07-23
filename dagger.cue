@@ -11,6 +11,16 @@ import (
 
     release: bool | *false
 
+    _targetName: string
+
+    if release {
+      _targetName: "release"
+    } 
+    
+    if !release {
+      _targetName: "debug"
+    }
+
     // Resulting container image
     image: _prodStage.output
 
@@ -94,7 +104,7 @@ import (
         },
         docker.#Copy & {
             contents: _buildStage.output.rootfs,
-            source: "/app/target/debug/dagger-rust"
+            source: "/app/target/" + _targetName + "/dagger-rust"
             dest:     "/app/dagger-rust"
         },
         docker.#Set & {
@@ -123,7 +133,7 @@ dagger.#Plan & {
       },
 
       load: cli.#Load & {
-          image: build.image
+          image: buildProd.image
           host:  client.network."unix:///var/run/docker.sock".connect
           tag:   "dagger-rust"
       },

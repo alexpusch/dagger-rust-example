@@ -12,6 +12,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env: 
+      DAGGER_LOG_LEVEL: "debug"
+
     steps:
       - name: Clone repository
         uses: actions/checkout@v2
@@ -28,21 +31,19 @@ jobs:
           echo "DAGGER_CACHE_FROM=type=gha,scope=dagger-rust-master type=gha,scope=dagger-rust-${{github.event.number}}" >> $GITHUB_ENV
         if: ${{ github.event_name == 'pull_request' }}
 
-      # You need to run `dagger project init` locally before and commit the cue.mod directory to the repository with its contents
       - name: Test
         uses: dagger/dagger-for-github@v3
-        env:
-          DAGGER_LOG_LEVEL: "debug"
-        # See all options at https://github.com/dagger/dagger-for-github
         with:
           version: 0.2
           cmds: |
             do test
 
-      - name: Print Buildkitd Logs
-        if: ${{ failure() }}
-        run: |
-          docker logs dagger-buildkitd
+      - name: Build production image
+        uses: dagger/dagger-for-github@v3
+        with:
+          version: 0.2
+          cmds: |
+            do load
 
-      - name: run
-        run: docker run app-image
+      - name: Run image
+        run: docker run dagger-rust
